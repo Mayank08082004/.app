@@ -1,6 +1,6 @@
 # sender.py
 import socket
-from crypto_utils import rsa_encrypt, generate_rsa_keys
+from crypto_utils import rsa_encrypt
 
 RECV_HOST = "127.0.0.1"
 RECV_PORT = 4444

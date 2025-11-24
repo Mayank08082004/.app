@@ -23,7 +23,11 @@ def main():
             print("[Receiver] Connected:", addr)
 
             data = conn.recv(4096).decode().strip()
-            cipher_list = list(map(int, data.split()))
+            cipher_list = []
+            parts = data.split()
+
+            for item in parts:
+                cipher_list.append(int(item))
 
             decrypted_msg = ""
             for c in cipher_list:
