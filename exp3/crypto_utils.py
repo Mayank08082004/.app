@@ -2,13 +2,24 @@
 import random
 
 def egcd(a, b):
-    if b == 0:
-        return a, 1, 0
-    g, x1, y1 = egcd(b, a % b)
-    return g, y1, x1 - (a // b) * y1
+    r1, r2 = a, b
+    s1, s2 = 1, 0
+    t1, t2 = 0, 1
+    print("\nq   r1   r2   r   s1  s2  s   t1  t2  t")
+    while r2 != 0:
+        q = r1 // r2
+        r = r1 % r2
+        s = s1 - q * s2
+        t = t1 - q * t2
+
+        r1, r2 = r2, r
+        s1, s2 = s2, s
+        t1, t2 = t2, t
+
+    return r1, s1%b
 
 def modinv(a, m):
-    g, x, _ = egcd(a, m)
+    g, x = egcd(a, m)
     if g != 1:
         return None
     return x % m
