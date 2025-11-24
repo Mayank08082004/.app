@@ -1,23 +1,22 @@
 import numpy as np
 
 ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-PLAYFAIR_ALPHABET = "ABCDEFGHIKLMNOPQRSTUVWXYZ" 
+PLAYFAIR_ALPHABET = "ABCDEFGHIKLMNOPQRSTUVWXYZ"
+
+
 # ----------------- Utility: Modular Inverse -----------------
 def mod_inverse(a, b):
     r1, r2 = a, b
     s1, s2 = 1, 0
-    print("\nq   r1   r2   r   t1  t2  t")
     while r2 != 0:
         q = r1 // r2
         r = r1 % r2
         s = s1 - q * s2
-
         r1, r2 = r2, r
         s1, s2 = s2, s
 
     if r1 != 1:
         return None
-    
     return s1 % b
 
 
@@ -31,8 +30,10 @@ def caesar_encrypt(text, key):
             res += ch
     return res
 
+
 def caesar_decrypt(text, key):
     return caesar_encrypt(text, -key)
+
 
 def caesar_attack(cipher):
     print("\n--- Brute Force Caesar Attack ---")
@@ -46,6 +47,7 @@ def mono_encrypt(text, key_map):
     for ch in text.upper():
         res += key_map.get(ch, ch)
     return res
+
 
 def mono_decrypt(text, key_map):
     rev = {v: k for k, v in key_map.items()}
@@ -92,9 +94,8 @@ def prepare_text(text):
 
     while i < len(text):
         a = text[i]
-
         if i + 1 < len(text):
-            b = text[i+1]
+            b = text[i + 1]
         else:
             b = "X"
 
@@ -107,7 +108,6 @@ def prepare_text(text):
 
     if len(cleaned) % 2 != 0:
         cleaned += "X"
-
     return cleaned
 
 
@@ -117,20 +117,16 @@ def playfair_encrypt(text, key):
     res = ""
 
     for i in range(0, len(prepared), 2):
-        a = prepared[i]
-        b = prepared[i+1]
-
+        a, b = prepared[i], prepared[i + 1]
         r1, c1 = find_position(matrix, a)
         r2, c2 = find_position(matrix, b)
 
         if r1 == r2:
             res += matrix[r1][(c1 + 1) % 5]
             res += matrix[r2][(c2 + 1) % 5]
-
         elif c1 == c2:
             res += matrix[(r1 + 1) % 5][c1]
             res += matrix[(r2 + 1) % 5][c2]
-
         else:
             res += matrix[r1][c2]
             res += matrix[r2][c1]
@@ -143,20 +139,16 @@ def playfair_decrypt(cipher, key):
     res = ""
 
     for i in range(0, len(cipher), 2):
-        a = cipher[i]
-        b = cipher[i+1]
-
+        a, b = cipher[i], cipher[i + 1]
         r1, c1 = find_position(matrix, a)
         r2, c2 = find_position(matrix, b)
 
         if r1 == r2:
             res += matrix[r1][(c1 - 1) % 5]
             res += matrix[r2][(c2 - 1) % 5]
-
         elif c1 == c2:
             res += matrix[(r1 - 1) % 5][c1]
             res += matrix[(r2 - 1) % 5][c2]
-
         else:
             res += matrix[r1][c2]
             res += matrix[r2][c1]
@@ -164,21 +156,19 @@ def playfair_decrypt(cipher, key):
     return res
 
 
-# ================= HILL CIPHER (2x2 and 3x3) =================
+# ================= HILL CIPHER =================
 def hill_encrypt(text, key_matrix):
     text = text.replace(" ", "").upper()
     n = len(key_matrix)
-
     while len(text) % n != 0:
         text += "X"
-
     nums = [ALPHABET.index(c) for c in text]
-    cipher = ""
 
+    cipher = ""
     for i in range(0, len(nums), n):
-        block = np.array(nums[i:i+n])
+        block = np.array(nums[i:i + n])
         enc = key_matrix.dot(block) % 26
-        cipher += ''.join(ALPHABET[val] for val in enc)
+        cipher += ''.join(ALPHABET[v] for v in enc)
     return cipher
 
 
@@ -196,9 +186,9 @@ def hill_decrypt(cipher, key_matrix):
     plain = ""
 
     for i in range(0, len(nums), n):
-        block = np.array(nums[i:i+n])
+        block = np.array(nums[i:i + n])
         dec = inv_matrix.dot(block) % 26
-        plain += ''.join(ALPHABET[val] for val in dec)
+        plain += ''.join(ALPHABET[v] for v in dec)
     return plain
 
 
@@ -209,11 +199,12 @@ def vigenere_encrypt(text, key):
     for ch in text.upper():
         if ch.isalpha():
             k = ALPHABET.index(key[j % len(key)])
-            res += ALPHABET[(ALPHABET.index(ch)+k) % 26]
+            res += ALPHABET[(ALPHABET.index(ch) + k) % 26]
             j += 1
         else:
             res += ch
     return res
+
 
 def vigenere_decrypt(text, key):
     res, j = "", 0
@@ -221,7 +212,7 @@ def vigenere_decrypt(text, key):
     for ch in text.upper():
         if ch.isalpha():
             k = ALPHABET.index(key[j % len(key)])
-            res += ALPHABET[(ALPHABET.index(ch)-k) % 26]
+            res += ALPHABET[(ALPHABET.index(ch) - k) % 26]
             j += 1
         else:
             res += ch
@@ -234,6 +225,7 @@ def vernam_encrypt(text, key):
     for a, b in zip(text.upper(), key.upper()):
         res += ALPHABET[(ALPHABET.index(a) ^ ALPHABET.index(b)) % 26]
     return res
+
 
 def vernam_decrypt(cipher, key):
     return vernam_encrypt(cipher, key)
@@ -253,6 +245,7 @@ def rail_fence_encrypt(text, depth):
         row += step
     return ''.join(rails)
 
+
 def rail_fence_decrypt(cipher, depth):
     pattern = [[] for _ in range(depth)]
     row, step = 0, 1
@@ -266,14 +259,52 @@ def rail_fence_decrypt(cipher, depth):
         row += step
 
     result = [""] * len(cipher)
-    index = 0
-
+    idx = 0
     for r in range(depth):
         for pos in pattern[r]:
-            result[pos] = cipher[index]
-            index += 1
-
+            result[pos] = cipher[idx]
+            idx += 1
     return ''.join(result)
+
+
+# ================= COLUMNAR TRANSPOSITION CIPHER =================
+def columnar_encrypt(plaintext, key):
+    plaintext = plaintext.replace(" ", "").upper()
+    n = len(key)
+
+    rows = []
+    for i in range(0, len(plaintext), n):
+        row = list(plaintext[i:i + n])
+        if len(row) < n:
+            row += ['X'] * (n - len(row))
+        rows.append(row)
+
+    order = sorted(list(zip(key, range(n))))  # (key_value, column_index)
+
+    cipher = ""
+    for _, col in order:
+        for r in rows:
+            cipher += r[col]
+
+    return cipher
+
+
+def columnar_decrypt(ciphertext, key):
+    ciphertext = ciphertext.replace(" ", "").upper()
+    n = len(key)
+    length = len(ciphertext)
+    rows = length // n
+
+    matrix = [[""] * n for _ in range(rows)]
+    order = sorted(list(zip(key, range(n))))
+
+    idx = 0
+    for _, col in order:
+        for r in range(rows):
+            matrix[r][col] = ciphertext[idx]
+            idx += 1
+
+    return ''.join(''.join(r) for r in matrix)
 
 
 # ================= MENU =================
@@ -286,11 +317,12 @@ while True:
     print("5. Polyalphabetic (Vigenere / Vernam)")
     print("6. Rail Fence Cipher")
     print("7. Attacks")
-    print("8. Exit")
+    print("8. Columnar Transposition Cipher")
+    print("9. Exit")
 
     ch = int(input("Enter choice: "))
 
-    if ch == 8:
+    if ch == 9:
         break
 
     # ---------------- Caesar ----------------
@@ -325,14 +357,11 @@ while True:
     elif ch == 4:
         text = input("Enter text: ").upper()
         n = int(input("Enter matrix size (2 or 3): "))
-
         print(f"Enter {n}x{n} key matrix row-wise:")
         mat = [list(map(int, input().split())) for _ in range(n)]
         key_matrix = np.array(mat)
-
         enc = hill_encrypt(text, key_matrix)
         dec = hill_decrypt(enc, key_matrix)
-
         print("Encrypted:", enc)
         print("Decrypted:", dec)
 
@@ -365,11 +394,18 @@ while True:
     # ---------------- Attacks ----------------
     elif ch == 7:
         cipher = input("Enter cipher text: ")
-
         print("\n1. Caesar Attack\n2. Monoalphabetic Attack\n3. Playfair Attack\n4. Hill Attack\n5. Vigenere Attack\n6. Vernam Attack\n7. Rail Fence Attack")
         a = int(input("Choose attack type: "))
-
         if a == 1:
             caesar_attack(cipher)
         else:
             print("Brute force attack NOT possible for this cipher.")
+
+    # ---------------- Columnar Transposition ----------------
+    elif ch == 8:
+        text = input("Enter plaintext: ")
+        key = list(map(int, input("Enter numeric key (e.g. 4 3 1 2 5 6 7): ").split()))
+        enc = columnar_encrypt(text, key)
+        dec = columnar_decrypt(enc, key)
+        print("Encrypted:", enc)
+        print("Decrypted:", dec)
