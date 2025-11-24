@@ -47,7 +47,7 @@ def modular_inverse(a, b):
     if r1 != 1:
         print("Modular Inverse does NOT exist")
     else:
-        print("Modular Inverse =", t1 % b)
+        print("Modular Inverse =", s1 % b)
 
 
 while True:
